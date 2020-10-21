@@ -4,6 +4,8 @@ import classes from "./ContactData.module.css"
 import axios from "../../../axios-orders"
 import Spinner from "../../../components/UI/Spinner/Spinner"
 import Input from "../../../components/UI/Forms/Input/Input"
+import { elementType } from 'prop-types'
+
 
  class ContactData extends Component {
         constructor(){
@@ -16,7 +18,12 @@ import Input from "../../../components/UI/Forms/Input/Input"
                         type:"text",
                         placeholder:"Your Name"
                     },
-                    value:""
+                    value:"",
+                    validation: {
+                        required:true
+                    },
+                    valid:false,
+                    touched:false
                 },
                 street:{
                     elementType : "input",
@@ -24,7 +31,12 @@ import Input from "../../../components/UI/Forms/Input/Input"
                         type:"text",
                         placeholder:"Street"
                     },
-                    value:""
+                    value:"",
+                    validation: {
+                        required:true
+                    },
+                    valid:false,
+                    touched:false
                 },
                 zipCode:{
                     elementType : "input",
@@ -32,7 +44,14 @@ import Input from "../../../components/UI/Forms/Input/Input"
                         type:"text",
                         placeholder:"Zip Code"
                     },
-                    value:""
+                    value:"",
+                    validation: {
+                        required:true,
+                        minLength:5,
+                        maxLength:5
+                    },
+                    valid:false,
+                    touched:false
                 },
                 country:{
                     elementType : "input",
@@ -40,7 +59,12 @@ import Input from "../../../components/UI/Forms/Input/Input"
                         type:"text",
                         placeholder:"Country"
                     },
-                    value:""
+                    value:"",
+                    validation: {
+                        required:true
+                    },
+                    valid:false,
+                    touched:false
                 },
                
                 email:{
@@ -49,7 +73,12 @@ import Input from "../../../components/UI/Forms/Input/Input"
                         type:"email",
                         placeholder:"Email"
                     },
-                    value:""
+                    value:"",
+                    validation: {
+                        required:true
+                    },
+                    valid:false,
+                    touched:false
                 },
                 deliveryMethod:{
                     elementType : "select",
@@ -59,21 +88,29 @@ import Input from "../../../components/UI/Forms/Input/Input"
                            {value:"cheapest", displayValue:"Cheapest"},
                         ]
                     },
-                    value:""
+                    value:"",
+                    validation:{},
+                    valid: true
+                   
                 }
                 },
-                loading:false
+                loading:false,
+                formIsValid: false
             }
         }
 
         orderHandler = (event) => {
             event.preventDefault()
               this.setState({loading:true})
+              const formData = {}
+              for(let formElemIdentifier in this.state.orderForm){
+                  formData[formElemIdentifier]= this.state.orderForm[formElemIdentifier].value
+              }
             const order = {
                 ingredients:this.props.ingredients,
                 price:this.props.price,
-           
-                
+                orderData:formData
+  
             }
 
         axios.post("/orders.json",order)
@@ -86,6 +123,48 @@ import Input from "../../../components/UI/Forms/Input/Input"
            })
         }
 
+        checkValidity = (value,rule) => {
+            let isValid = true;
+            
+            if(!rule) return true;
+
+            if(rule.required){
+                isValid = value.trim() !== "" && isValid;
+            }
+            if(rule.minLength){
+                isValid = value.length >= rule.minLength && isValid
+            }
+            if(rule.maxLength){
+                isValid = value.length <= rule.maxLength && isValid
+            }
+
+            return isValid
+        }
+
+        inputChangedHandler = (event,inputIdentifier) => {
+           const updatedOrderForm = {
+               ...this.state.orderForm
+           }
+           const updatedFormElement = {
+               ...updatedOrderForm[inputIdentifier]
+           }
+
+           updatedFormElement.value = event.target.value;
+           updatedFormElement.valid = this.checkValidity(updatedFormElement.value,updatedFormElement.validation)
+           updatedFormElement.touched = true
+           updatedOrderForm[inputIdentifier] = updatedFormElement
+        
+           let formIsValidVar = true
+           for (let input  in updatedOrderForm){
+               formIsValidVar = updatedOrderForm[input].valid && formIsValidVar
+           }
+            this.setState({
+                orderForm : updatedOrderForm,
+                formIsValid : formIsValidVar
+            })
+        }
+
+     
 
     render() {
 
@@ -93,26 +172,32 @@ import Input from "../../../components/UI/Forms/Input/Input"
         for (let key in this.state.orderForm){
             formsElementsArray.push({
                 id:key,
-                config:this.state.orderForm[key],
+                config: this.state.orderForm[key],
             })
         }
 
-        let form = ( <form>
-            {/* <Input elementType={} elementConfig={} value={}/> */}
+        let form = ( <form onSubmit={this.orderHandler}>
+           
            {formsElementsArray.map(elem=>(
                <Input 
-               key={elem.id}
-               elementType={elem.config.elementType}
-               elementConfig={elem.config.elementConfig}
-               value={elem.config.value}
+               key = {elem.id}
+               elementType = {elem.config.elementType}
+               elementConfig = {elem.config.elementConfig}
+               value = {elem.config.value}
+               invalid = {!elem.config.valid}
+               shouldValidate = {elem.config.validation}
+               touched = {elem.config.touched}
+               changed = {(event) => this.inputChangedHandler(event,elem.id)}
                />
 
-           ))}
-            <Button clicked={this.orderHandler} btnType="Success">ORDER</Button>
+           ))} 
+            <Button  btnType="Success" disabled={!this.state.formIsValid}>ORDER</Button>
         </form>);
+
         if(this.state.loading){
              form = <Spinner />
         }
+
         return (
             <div className = {classes.ContactData}>
                 <h4>Enter Contact Data Please !</h4>
