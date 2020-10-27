@@ -5,7 +5,7 @@ import classes from "./CheckoutSummary.module.css"
 
 
 const CheckoutSummary = (props) => {
-    console.log("props.ingredients in checkoutsummary",props.ingredients)
+   
     return (
         <div className={classes.CheckoutSummary}>
             <h1>We hope it tastes well</h1>

@@ -5,8 +5,8 @@ import classes from "./ContactData.module.css"
 import axios from "../../../axios-orders"
 import Spinner from "../../../components/UI/Spinner/Spinner"
 import Input from "../../../components/UI/Forms/Input/Input"
-import { elementType } from 'prop-types'
-
+import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler"
+import * as actionTypes from "../../../store/actions/actionIndex"
 
  class ContactData extends Component {
         constructor(){
@@ -89,20 +89,20 @@ import { elementType } from 'prop-types'
                            {value:"cheapest", displayValue:"Cheapest"},
                         ]
                     },
-                    value:"",
+                    value:"fastest",
                     validation:{},
                     valid: true
                    
                 }
                 },
-                loading:false,
+               
                 formIsValid: false
             }
         }
 
         orderHandler = (event) => {
             event.preventDefault()
-              this.setState({loading:true})
+              
               const formData = {}
               for(let formElemIdentifier in this.state.orderForm){
                   formData[formElemIdentifier]= this.state.orderForm[formElemIdentifier].value
@@ -111,17 +111,11 @@ import { elementType } from 'prop-types'
                 ingredients:this.props.ings,
                 price:this.props.price,
                 orderData:formData
-  
             }
 
-        axios.post("/orders.json",order)
-        .then(response=>{
-               this.setState({loading:false})
-               this.props.history.push("/")
-           })
-        .catch(error=>{
-                this.setState({loading:false})
-           })
+            this.props.onOrderBurger(order)
+
+        
         }
 
         checkValidity = (value,rule) => {
@@ -195,7 +189,7 @@ import { elementType } from 'prop-types'
             <Button  btnType="Success" disabled={!this.state.formIsValid}>ORDER</Button>
         </form>);
 
-        if(this.state.loading){
+        if(this.props.loading){
              form = <Spinner />
         }
 
@@ -209,9 +203,15 @@ import { elementType } from 'prop-types'
 }
 const mapStateToProps = state => {
     return {
-        ings: state.ingredients,
-        price :state.totalPrice
+        ings: state.burgerBuilder.ingredients,
+        price :state.burgerBuilder.totalPrice,
+        loading:state.orderReducer.loading
     }
 }
+    const mapDispatchToProps = dispatch => {
+       return {
+        onOrderBurger: (orderData) => dispatch(actionTypes.purchaseBurger(orderData))
+       }
+    }
 
-export default connect(mapStateToProps)(ContactData)
+export default connect(mapStateToProps,mapDispatchToProps)(withErrorHandler(ContactData,axios))
