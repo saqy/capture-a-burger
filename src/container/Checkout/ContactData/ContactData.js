@@ -9,6 +9,7 @@ import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler"
 import * as actionTypes from "../../../store/actions/actionIndex"
 
  class ContactData extends Component {
+     //"../../../components/UI/Forms/Input/Input
         constructor(){
             super()
             this.state={
@@ -90,7 +91,9 @@ import * as actionTypes from "../../../store/actions/actionIndex"
                         ]
                     },
                     value:"fastest",
-                    validation:{},
+                    validation:{
+                        required:true,
+                    },
                     valid: true
                    
                 }
