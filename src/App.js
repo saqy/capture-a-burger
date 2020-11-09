@@ -16,14 +16,13 @@ class App extends Component {
 
   render() {
     let routes = (
-        <Switch>
-          <Route path="/" exact component={BurgerBuilder} />
-          <Route path="/auth" component={Auth} />
-          
-          <Redirect to="/" />
-        </Switch>
-      );
-   
+      <Switch>
+        <Route path="/" exact component={BurgerBuilder} />
+        <Route path="/auth" component={Auth} />
+
+        <Redirect to="/" />
+      </Switch>
+    );
 
     if (this.props.isAunthenticated) {
       routes = (
@@ -40,9 +39,7 @@ class App extends Component {
 
     return (
       <div>
-        <Layout>
-        {routes}
-        </Layout>
+        <Layout>{routes}</Layout>
       </div>
     );
   }

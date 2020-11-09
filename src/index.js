@@ -9,25 +9,36 @@ import burgerBuilderReducer from "./store/reducers/burgerBuilderReducer";
 import { createStore, applyMiddleware, compose, combineReducers } from "redux";
 import thunk from "redux-thunk";
 import submitOrderReducer from "./store/reducers/submitOrderReducer";
-import authReducer from "./store/reducers/authReducer"
+import authReducer from "./store/reducers/authReducer";
+import createSagaMiddleware from "redux-saga";
+import {
+  watchAuth,
+  watchBurgerBuilder,
+  watchOrderBurger,
+} from "./store/sagas/sagaIndex";
+
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const rootReducers = combineReducers({
   burgerBuilder: burgerBuilderReducer,
   orderReducer: submitOrderReducer,
-  auth: authReducer
-
+  auth: authReducer,
 });
+
+const sagaMiddleware = createSagaMiddleware();
 
 const store = createStore(
   rootReducers,
-  composeEnhancers(applyMiddleware(thunk))
+  composeEnhancers(applyMiddleware(thunk, sagaMiddleware))
 );
+
+sagaMiddleware.run(watchAuth);
+sagaMiddleware.run(watchBurgerBuilder);
+sagaMiddleware.run(watchOrderBurger);
 
 const app = (
   <Provider store={store}>
     <BrowserRouter>
-      {" "}
       <App />
     </BrowserRouter>
   </Provider>
