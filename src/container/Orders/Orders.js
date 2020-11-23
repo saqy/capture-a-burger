@@ -5,6 +5,7 @@ import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 import * as actions from "../../store/actions/actionIndex";
 import { connect } from "react-redux";
 import Spinner from "../../components/UI/Spinner/Spinner";
+import OrderSomething from "../../components/UI/orderSomething"
 
 class Orders extends Component {
   componentDidMount() {
@@ -23,7 +24,8 @@ class Orders extends Component {
         />
       ));
     }
-    return <div>{orders}</div>;
+  
+    return <div>{orders.length> 0 ? orders : <OrderSomething />}</div>;
   }
 }
 
